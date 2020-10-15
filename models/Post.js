@@ -33,6 +33,11 @@ const PostSchema = mongoose.Schema({
   {body:String,
     date:Date
   }],
+  user:{
+    type: mongoose.Types.ObjectId, 
+    required: true,
+    ref: 'User'
+  }, 
 },
   {
     timestamps:true
