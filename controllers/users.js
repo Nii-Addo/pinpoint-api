@@ -1,3 +1,4 @@
+const createError=require('http-errors');
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
@@ -5,7 +6,7 @@ var multer=require('multer');
 const jwtDecode=require('jwt-decode');
 const jwt=require('express-jwt');
 
-let UserProfile = require("../models/UserProfile");
+let User = require("../models/User");
 
 var storage= multer.diskStorage({
   destination:(req,file,cb) => {
@@ -24,7 +25,7 @@ var storage= multer.diskStorage({
 })
 
 var upload= multer({storage:storage});
-/*
+
 const attachUser=(req,res,next)=>{
   const token=req.headers.authorization;
   if(!token){
@@ -49,21 +50,45 @@ router.use(attachUser);
 const checkJwt=jwt({
   secret:process.env.JWT_SECRET,
   algorithms:['HS256'],
-  issuer:'api.live-weather',
-  audience:'api.live-weather'
+  issuer:'api.pinpoint',
+  audience:'api.pinpoint'
 });
 
 router.use(checkJwt);
-*/
+
+
+router.post('/',async(req, res) => {
+  //create user profile
+  const {error,value}=validateProfile(req.body);
+  if (error) {
+    return res.status(400).json(error.details[0].message);
+  } else {
+    const {sub}=req.user;
+    User.findOne({_id:sub})
+    .then((user)=>{
+
+      const userProfileDto={
+        userName:value.userName,
+        bio:value.bio,
+        interests:value.interests,
+      }
+      user.userProfile=userProfileDto;
+      return user.save();
+    })
+    .then((user)=>res.status(200).json(user))
+    .catch(err=>createError(400,"Could not update user profile"))
+  }
+})
 
 router.post('/image/:id',upload.single('profileImage'),async(req, res) => {
-  
-  UserProfile.findOne({ _id: req.params.id }).
-  then(userProfile => {
-    Object.assign(userProfile,{profileImage:req.file.path.replace(/\\/g, "/")});
-    return userProfile.save();
+  //add profile pic
+  const {sub}=req.user;
+  User.findOne({ _id: sub }).
+  then(user => {
+    user.userProfile.profileImage=req.file.path.replace(/\\/g, "/")
+    return user.save();
   })
-  .then(userProfile => res.json({ userProfile }))
+  .then(user => res.json({ user }))
   .catch((err)=>{
          if (err instanceof multer.MulterError) {
                return res.status(500).json(err)
@@ -72,24 +97,6 @@ router.post('/image/:id',upload.single('profileImage'),async(req, res) => {
            }
         })
 
-})
-
-router.post('/',async(req, res) => {
-  const {error,value}=validateProfile(req.body);
-  if (error) {
-    return res.status(400).json(error.details[0].message);
-  } else {
-    const userProfileDto=Object.assign({},value);
-    const userProfile=new UserProfile(userProfileDto);
-    await userProfile.save()
-        .then((savedUserProfile)=>{
-          res.status(200).json(savedUserProfile);
-        })
-        .catch((err)=>{
-               return res.status(500).json(err)
-           }
-        )
-  }
 })
 
 const validateProfile = (userProfile) => {

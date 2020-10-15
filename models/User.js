@@ -32,6 +32,24 @@ const UserSchema=new Schema({
       required:true,
       default:'user'
     },
+    userProfile:{
+      userName:{
+      type:String,
+      minlength:3,
+      trim:true
+    },
+    profileImage: { 
+      type: String 
+    },
+    bio:{
+      type:String,
+      minlength:3,
+      trim:true
+    },
+    interests:{
+      type:String,
+    },
+    }, 
   },
   {
     timestamps:true

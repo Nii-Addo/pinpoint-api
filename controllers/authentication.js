@@ -10,7 +10,6 @@ require("dotenv").config();
 const { createToken } = require("../config/jwt");
 let User = require("../models/User");
 
-
 /*Login handler*/
 router.post("/login", async (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
@@ -40,6 +39,7 @@ router.post("/login", async (req, res, next) => {
         const decodedToken = jwtDecode(token);
         const expiresAt = decodedToken.exp;
 
+        console.log(userInfo);
         res.json({
           message: "Successfully authenticated",
           token,
