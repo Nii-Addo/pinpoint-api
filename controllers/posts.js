@@ -46,7 +46,7 @@ const attachUser=(req,res,next)=>{
   }
 }
 
-//router.use(attachUser);
+router.use(attachUser);
 
 const checkJwt=jwt({
   secret:process.env.JWT_SECRET,
@@ -55,11 +55,11 @@ const checkJwt=jwt({
   audience:'api.pinpoint'
 });
 
-//router.use(checkJwt);
+router.use(checkJwt);
 
 router.post('/',upload.single('media'),async(req, res, next) =>{
- // const {sub}=req.user;,{user:sub}
-  const postDto=Object.assign({},{media:req.file.path.replace(/\\/g, "/"),});
+  const {sub}=req.user;
+  const postDto=Object.assign({},{media:req.file.path.replace(/\\/g, "/"),},{user:sub});
   const post=new Posts(postDto);
   await post.save()
         .then((savedPost)=>{
@@ -92,6 +92,7 @@ router.post('/create/:id',(req, res) =>{
 router.get('/',(req,res,next)=>{
   
   Posts.find({})
+  .populate("user")
     .exec((err,posts)=>{
       if(err){
         createError(403,"No posts available")

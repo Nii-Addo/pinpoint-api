@@ -49,6 +49,10 @@ const UserSchema=new Schema({
     interests:{
       type:String,
     },
+    level:{
+      type:String,
+      default:"newbie",
+    }
     }, 
   },
   {
