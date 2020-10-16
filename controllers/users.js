@@ -10,7 +10,7 @@ let User = require("../models/User");
 
 var storage= multer.diskStorage({
   destination:(req,file,cb) => {
-    cb(null,'profileImages/')
+    cb(null,'profile-images/')
   },
   filenames:(req,file,cb) => {
     cb(null,`${Date.now()}_${file.originalname}`)
