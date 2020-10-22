@@ -93,6 +93,7 @@ router.get('/',(req,res,next)=>{
   
   Posts.find({})
   .populate("user")
+  .sort({createdAt:-1})
     .exec((err,posts)=>{
       if(err){
         createError(403,"No posts available")
